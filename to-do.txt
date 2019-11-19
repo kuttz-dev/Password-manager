@@ -1,0 +1,37 @@
+﻿You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+
+https://support.flaticon.com/hc/en-us/articles/207248209-How-I-must-insert-the-attribution-
+Iconnice
+https://www.flaticon.com/free-icon/copy_130992#term=copy&page=1&position=5
+
+https://www.flaticon.com/free-icon/settings_149294#term=configuration&page=1&position=3
+https://www.flaticon.com/free-icon/database_149205#term=database&page=1&position=4
+Smashicons
+
+Revisar los [ y ] en backend.py
+Asegurar que la falta de cfg de .ini no arruinte todo =)
+No, you should create a connection to the database using QSqlDatabase and then you can pass the database to the model. From that point the model should automatically populate with the contents of the DB
+columns can have custom delegates for styling and such
+The model because there exists a QSqlTableModel but don't think the widget has anything equivalent
+
+https://www.flaticon.com/free-icon/focus_1144485
+Freepik
+
+listo: enviar error si todas las opciones para generar contraseña son false (linea 53)
+
+funcion que revise el archivo opciones.ini
+
+https://www.flaticon.com/free-icon/search_149309?term=search&page=1&position=14
+https://www.flaticon.com/free-icon/unlocked_149463?term=lock&page=1&position=18
+
+Para guardar la contraseña maestra:
+hacemos la key
+con la key encriptamos la contraseña maestra
+guardamos la contraseña maestra encriptada
+
+Para verificar la contraseña maestra:
+haccemos una key con lo que se ingresa
+se encripa la contraseña maestra que ingreso con la key que se acaba de generar
+comparamos la contraseña maestra encriptada nueva con la almacenada en la db
+
+Problema con este metodo: Si se borra la key guardada en la base de datos, no se va a poder verificar
