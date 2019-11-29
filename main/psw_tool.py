@@ -149,9 +149,10 @@ class VentanaPrincipal(QTabWidget):
         self.ui.comboBox_categoria.currentText()
         self.ui.input_url.toPlainText()'''
         try:
-            pass
-            #self.query.exec_('INSERT INTO passwords (categoria, favicon, website, mail, username, contraseña) VALUES({},{},{},{},{},{})',format())
-            #self.db.commit()
+            with open("contraseñas.txt") as file:
+                file.append("""
+
+                    """)
         except Exception as ex:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)

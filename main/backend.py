@@ -235,10 +235,26 @@ def obtener_cfg():
         numeros = cfg['OPCIONES']['numeros']
         special = cfg['OPCIONES']['special']
         favicon = cfg['OPCIONES']['favicon']
-        return largo, mayus, minus, numeros, special, favicon
+
+    except configparser.MissingSectionHeaderError as HeaderError:
+        generar_cfg()
+        return obtener_cfg()
 
     except Exception as e:
-        print(e)
+        return print("El error es:", e, " -- Y es de tipo:", type(e))
+    
+    try:
+        largo = int(largo)
+
+    except ValueError as verror:
+        generar_cfg(13, mayus, minus, numeros, special, favicon)
+        return obtener_cfg()
+
+    if int(largo) < 4 or int(largo) > 16:
+        generar_cfg(13, mayus, minus, numeros, special, favicon)
+        return obtener_cfg()    
+
+    return largo, mayus, minus, numeros, special, favicon
 
 
 def editar_cfg(categoria, argumento, valor):
