@@ -35,3 +35,5 @@ se encripa la contraseña maestra que ingreso con la key que se acaba de generar
 comparamos la contraseña maestra encriptada nueva con la almacenada en la db
 
 Problema con este metodo: Si se borra la key guardada en la base de datos, no se va a poder verificar
+
+PyInstaller
