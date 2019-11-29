@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'psw_tool.ui',
 # licensing of 'psw_tool.ui' applies.
 #
-# Created: Mon Nov 18 16:36:11 2019
+# Created: Fri Nov 29 04:09:09 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -220,6 +220,9 @@ class Ui_TabWidget(object):
         sizePolicy.setHeightForWidth(self.boton_guardar.sizePolicy().hasHeightForWidth())
         self.boton_guardar.setSizePolicy(sizePolicy)
         self.boton_guardar.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.boton_guardar.setFont(font)
         self.boton_guardar.setCursor(QtCore.Qt.PointingHandCursor)
         self.boton_guardar.setObjectName("boton_guardar")
         self.verticalLayout_2.addWidget(self.boton_guardar)
@@ -307,7 +310,7 @@ class Ui_TabWidget(object):
         self.spinBox_largo.setFrame(False)
         self.spinBox_largo.setAccelerated(False)
         self.spinBox_largo.setProperty("showGroupSeparator", True)
-        self.spinBox_largo.setMinimum(3)
+        self.spinBox_largo.setMinimum(4)
         self.spinBox_largo.setMaximum(16)
         self.spinBox_largo.setProperty("value", 13)
         self.spinBox_largo.setObjectName("spinBox_largo")
@@ -380,7 +383,7 @@ class Ui_TabWidget(object):
         self.grupo_opciones_psw.setTitle(QtWidgets.QApplication.translate("TabWidget", "Opciones para la formacion de la contraseña:", None, -1))
         self.check_mayus.setText(QtWidgets.QApplication.translate("TabWidget", "Mayúsculas", None, -1))
         self.check_caracteres.setText(QtWidgets.QApplication.translate("TabWidget", "Caracteres especiales: !%_-@#", None, -1))
-        self.boton_guardar_config.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Presione para guardar esta configuracion", None, -1))
+        self.boton_guardar_config.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Presione para guardar esta configuración", None, -1))
         self.boton_guardar_config.setText(QtWidgets.QApplication.translate("TabWidget", "Guardar", None, -1))
         self.check_numeros.setText(QtWidgets.QApplication.translate("TabWidget", "Números", None, -1))
         self.check_min.setText(QtWidgets.QApplication.translate("TabWidget", "Minúsculas", None, -1))

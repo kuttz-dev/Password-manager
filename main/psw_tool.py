@@ -25,7 +25,7 @@ class VentanaPrincipal(QTabWidget):
 
         # Alertas
         self.alerta_config = QMessageBox(QMessageBox.Warning, "Problema con la configuración actual", "Existen dos posibilidades para este error:\n\n1. El archivo de configuración esta dañando\n2. Usted tiene todas las opciones desmarcadas (el amor no cuenta)\n\nPara solucionarlo, borre el archivo de configuracion ('opciones.ini'),\no marque alguna opcion en la pesaña de configuración y gaurde su seleccion\n")
-        self.info_app = QMessageBox(QMessageBox.Information, "Informacion", "Por favor comunicar cualquier error con el desarrollador de esta aplicacion, JosephKM - steamcommunity.com/id/JosephKm/")
+        self.info_app = QMessageBox(QMessageBox.Information, "Información", "Por favor comunicar cualquier error con el desarrollador de esta aplicación, JosephKM - steamcommunity.com/id/JosephKm/")
         self.alerta_master_psw = QMessageBox(QMessageBox.NoIcon, "Ingrese su contraseña maestra", "")
 
         # Botones
@@ -149,9 +149,10 @@ class VentanaPrincipal(QTabWidget):
         self.ui.comboBox_categoria.currentText()
         self.ui.input_url.toPlainText()'''
         try:
-            pass
-            #self.query.exec_('INSERT INTO passwords (categoria, favicon, website, mail, username, contraseña) VALUES({},{},{},{},{},{})',format())
-            #self.db.commit()
+            with open("contraseñas.txt") as file:
+                file.append("""
+
+                    """)
         except Exception as ex:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
