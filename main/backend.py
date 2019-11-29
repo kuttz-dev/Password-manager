@@ -23,7 +23,7 @@ def conectar_db(db):
 def crear_tabla_contraseñas(conexion, cursor):
     # if favicon is True:
     try:
-        cursor.execute('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, website TEXT, mail TEXT, username TEXT, contraseña BLOB);')
+        cursor.execute('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña BLOB);')
         conexion.commit()
 
     except sqlite3.OperationalError as ex:
