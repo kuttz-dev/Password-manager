@@ -216,7 +216,8 @@ class VentanaPrincipal(QTabWidget):
         if muestra_db is None:
             nueva_muestra = backend.generar_muestra(key_contraseña_maestra)
             print(nueva_muestra)
-            self.db.exec_("INSERT INTO maestra (id, muestra) VALUES(1, rb'Z0FBQUFBQmQ0Z25LNmk4dnI2eHNGYXlmR0pFWVFxcmFPaFZMbWs1dVRTVUE4ZkstQ04xZmhwT2pXQWpyNTNYUWV5MUxYeG4weXZ5V3ZXeXRQYmRMQWs0aEZZOUZ6a3JteXJJT3ZUS3dvTHkzWFJGM1RndTJmWTQ9')")
+            self.master_query = QSqlQuery()
+            self.master_query.exec_("INSERT INTO maestra (id, muestra) VALUES(1, ?)" (nueva_muestra))
             print(self.db.lastError())
             self.db.commit()
 
