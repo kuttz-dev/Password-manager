@@ -176,10 +176,9 @@ class VentanaPrincipal(QTabWidget):
         self.ui.input_url.toPlainText()
         '''
         try:
-            with open("contraseñas.txt") as file:
-                file.append("""
-
-                    """)
+            pass
+            #self.query.exec_('INSERT INTO passwords (categoria, favicon, website, mail, username, contraseña) VALUES({},{},{},{},{},{})',format())
+            #self.db.commit()
         except Exception as ex:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
