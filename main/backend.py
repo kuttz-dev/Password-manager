@@ -56,6 +56,7 @@ def guardar(conexion, cursor, categoria, favicon, url, mail, usuario, contraseñ
         message = template.format(type(ex).__name__, ex.args)
         print(message)
 
+
 def obtener_columna(cursor, columna):
     cursor.execute("SELECT {} FROM passwords".format(columna))
     entradas = cursor.fetchall()
@@ -63,6 +64,17 @@ def obtener_columna(cursor, columna):
     resultados = list(filter(None, resultados))
 
     return resultados
+
+
+def obtener_muestra_db():
+    conexcion, cursor = conectar_db("cuentas.db")
+    muestra_db = cursor.execute('SELECT muestra FROM maestra WHERE id = 1')
+    muestra_db = muestra_db.fetchone()
+    # Devolvemos
+    if muestra_db is None:
+        return None
+    else:
+        return muestra_db[0]
 
 # Otra seccion
 # ~~~~~~~~~~~~~

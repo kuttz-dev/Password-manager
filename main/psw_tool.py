@@ -1,13 +1,15 @@
 import sys
 from time import sleep
 
-from PySide2.QtWidgets import QApplication, QMainWindow, QTabWidget, QLineEdit, QMessageBox, QInputDialog  # QLineEdit para input_psw
+from PySide2.QtWidgets import QApplication, QMainWindow, QTabWidget, QLineEdit, QMessageBox, QInputDialog, QDialog  # QLineEdit para input_psw
 from PySide2.QtCore import QFile
 from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
 
 
 from psw_tool_ui import Ui_TabWidget
+from dialogo_informacion_ui import Ui_dialogo_info
+from dialogo_master_psw_ui import Ui_dialogo_master_psw
 import backend
 import pswCrypto
 
@@ -24,9 +26,22 @@ class VentanaPrincipal(QTabWidget):
         self.master_psw = None
 
         # Alertas
-        self.alerta_config = QMessageBox(QMessageBox.Warning, "Problema con la configuración actual", "Existen dos posibilidades para este error:\n\n1. El archivo de configuración esta dañando\n2. Usted tiene todas las opciones desmarcadas (el amor no cuenta)\n\nPara solucionarlo, borre el archivo de configuracion ('opciones.ini'),\no marque alguna opcion en la pesaña de configuración y gaurde su seleccion\n")
+        self.alerta_config = QMessageBox(QMessageBox.Warning, "Problema con la configuración actual", "Existen dos posibilidades para este error:\n\n1. El archivo de configuración está dañando\n2. Usted tiene todas las opciones desmarcadas (el amor no cuenta)\n\nPara solucionarlo, borre el archivo de configuración ('opciones.ini'),\no marque alguna opción en la pestaña de configuración y guarde su selección\n")
+        self.alerta_master_psw_mala = QMessageBox(QMessageBox.Warning, "Problema con la contraseña ingresada", "Por favor tome precauciones con la elección de la contraseña maestra.\nPara poder proseguir debe ingresar una contraseña con más de 5 y menos de 17 caracteres, o sino presione cancelar.")
+            # Alertas con su propia UI
+                # Dialog info
+        self.dialogo_info = QDialog()
+        self.info_app = Ui_dialogo_info()
+        self.info_app.setupUi(self.dialogo_info)
+                # Alerta master psw
+        self.dialogo_master_psw = QDialog()
+        self.alerta_master_psw = Ui_dialogo_master_psw()  
+        self.alerta_master_psw.setupUi(self.dialogo_master_psw)
+
+        '''
         self.info_app = QMessageBox(QMessageBox.Information, "Informacion", "Por favor comunicar cualquier error con el desarrollador de esta aplicacion, JosephKM - steamcommunity.com/id/JosephKm/")
         self.alerta_master_psw = QMessageBox(QMessageBox.NoIcon, "Ingrese su contraseña maestra", "")
+        '''
 
         # Botones
         self.ui.boton_guardar_config.clicked.connect(self.guardar_config)  # connect button clicked with action  # boton guardar config
@@ -35,6 +50,7 @@ class VentanaPrincipal(QTabWidget):
         self.ui.boton_guardar.clicked.connect(self.guardar_contraseña) # boton guardar data
         # Si presionan el boton revelar contraseña
         self.ui.reveal_psw.clicked.connect(self.mostrar_contraseña)
+        self.alerta_master_psw.reveal_master_psw.clicked.connect(self.mostrar_contraseña_maestra)
             # Icono del boton revelar contraseña
         self.icon_not_view = QIcon()
         self.icon_not_view.addPixmap(QPixmap(":/media/iconografia/not_view.png"), QIcon.Normal, QIcon.Off)
@@ -56,7 +72,7 @@ class VentanaPrincipal(QTabWidget):
         self.conector = QSqlDatabase.database()
         self.query = QSqlQuery()
         self.query.exec_('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY ASC, categoria TEXT, favicon BLOB, website TEXT, mail TEXT, username TEXT, contraseña BLOB);')
-        self.query.exec_('CREATE TABLE IF NOT EXISTS master (id INTEGER PRIMARY KEY, password BLOB);')
+        self.query.exec_('CREATE TABLE IF NOT EXISTS maestra (id INTEGER PRIMARY KEY, muestra BLOB);')
         self.db.commit()
         self.model = QSqlTableModel()
         self.model.setTable('passwords')
@@ -65,6 +81,7 @@ class VentanaPrincipal(QTabWidget):
         self.ui.tabla_db.setModel(self.model)
         self.ui.tabla_db.setWindowTitle("Titulossas")
         #print(self.model.rowCount())
+
 
     def cargar_config(self):
         largo, mayus, minus, numeros, special, favicon = backend.obtener_cfg()   
@@ -102,7 +119,7 @@ class VentanaPrincipal(QTabWidget):
 
 
     def cargar_info(self):
-        return self.info_app.exec()        
+        return self.dialogo_info.exec()        
 
 
     def llamar_generar_contraseña(self):
@@ -130,6 +147,19 @@ class VentanaPrincipal(QTabWidget):
             self.ui.input_psw.setEchoMode(QLineEdit.Password)
 
 
+    def mostrar_contraseña_maestra(self, modoEcho = False):
+        # Si no se cambio el estado va a estar en False y se va a usar el echoMode del input
+        if modoEcho is False:
+            modoEcho = self.alerta_master_psw.input_master_psw.echoMode()
+        # Si esta en password a normal y viceversa
+        if modoEcho == QLineEdit.EchoMode.Password:
+            self.alerta_master_psw.reveal_master_psw.setIcon(self.icon_not_view)
+            self.alerta_master_psw.input_master_psw.setEchoMode(QLineEdit.Normal)
+        else:
+            self.alerta_master_psw.reveal_master_psw.setIcon(self.icon_view)
+            self.alerta_master_psw.input_master_psw.setEchoMode(QLineEdit.Password)
+
+
     def llamar_copiar(self, numero_boton):
         if numero_boton == 1:
             backend.copiar(str(self.ui.input_psw.text()))
@@ -141,13 +171,14 @@ class VentanaPrincipal(QTabWidget):
 
     def guardar_contraseña(self):
         if self.master_psw is None:
-            contraseña = self.pedir_contraseña_maestra()
+            self.master_psw = self.pedir_contraseña_maestra()
         '''
         self.ui.input_psw.text()
         self.ui.comboBox_usuario.currentText()
         self.ui.comboBox_mail.currentText()
         self.ui.comboBox_categoria.currentText()
-        self.ui.input_url.toPlainText()'''
+        self.ui.input_url.toPlainText()
+        '''
         try:
             pass
             #self.query.exec_('INSERT INTO passwords (categoria, favicon, website, mail, username, contraseña) VALUES({},{},{},{},{},{})',format())
@@ -159,19 +190,43 @@ class VentanaPrincipal(QTabWidget):
 
 
     def pedir_contraseña_maestra(self):
-        # La solicitamos
-        contraseña_maestra = QInputDialog().getText(self, "Contraseña maestra",
-                                     "\nEsta contraseña le dara acceso al resto,\npor favor considere severamente cual usara\ny recuerde no perderla,\nsino sus contraseñas seran irrecuperables\n(Minimo 6 caracteres)\n\nContraseña maestra:", QLineEdit.Normal)[0]
-        # Comprobamos que cumpla requisitos
-        if contraseña_maestra == "" or len(contraseña_maestra) < 6:
-            return self.pedir_contraseña_maestra()
+        self.dialogo_master_psw.exec()
+        
+        contraseña_maestra = self.alerta_master_psw.input_master_psw.text()
+        # Borrarmos el texto porque no se borra solo, y lo volvemos secreto de nuevo
+        self.alerta_master_psw.input_master_psw.setText("")
+        self.mostrar_contraseña_maestra(QLineEdit.EchoMode.Normal)
 
+        # Si le dio a cancelar
+        if bool(self.dialogo_master_psw.result()) is False:
+            return "Accion canelada"
+
+        # Comprobamos que cumpla requisitos
+        if contraseña_maestra == "" or len(contraseña_maestra) < 6 or len(contraseña_maestra) >16:
+            self.alerta_master_psw_mala.exec()
+            return self.pedir_contraseña_maestra()
+        
         # Encriptacion
         key_contraseña_maestra = pswCrypto.generar_key(contraseña_maestra) # La convertimos en una key
-        contraseña_maestra = pswCrypto.encriptar(contraseña_maestra, key_contraseña_maestra) # Encriptamos la contraseña con la key
+        contraseña_maestra_encriptada = pswCrypto.encriptar(contraseña_maestra, key_contraseña_maestra) # Encriptamos la contraseña con la key
         # Verificacion
-        
+        # Obtenemos la muestra guardada en la db
+        muestra_db = backend.obtener_muestra_db()
+        # Si no habia guardamos una nueva con esta contraseña maestra
+        if muestra_db is None:
+            nueva_muestra = backend.generar_muestra(key_contraseña_maestra)
+            print(nueva_muestra)
+            self.db.exec_("INSERT INTO maestra (id, muestra) VALUES(1, rb'Z0FBQUFBQmQ0Z25LNmk4dnI2eHNGYXlmR0pFWVFxcmFPaFZMbWs1dVRTVUE4ZkstQ04xZmhwT2pXQWpyNTNYUWV5MUxYeG4weXZ5V3ZXeXRQYmRMQWs0aEZZOUZ6a3JteXJJT3ZUS3dvTHkzWFJGM1RndTJmWTQ9')")
+            print(self.db.lastError())
+            self.db.commit()
 
+            # RETURN QUE?
+        else:
+            # Ahora si verificamos
+            print(type(muestra_db), type(key_contraseña_maestra)) 
+            psw_correcta = backend.verificar_key(muestra_db, key_contraseña_maestra)
+            print(psw_correcta)
+    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
