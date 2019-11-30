@@ -38,10 +38,6 @@ class VentanaPrincipal(QTabWidget):
         self.alerta_master_psw = Ui_dialogo_master_psw()  
         self.alerta_master_psw.setupUi(self.dialogo_master_psw)
 
-        '''
-        self.info_app = QMessageBox(QMessageBox.Information, "Informacion", "Por favor comunicar cualquier error con el desarrollador de esta aplicacion, JosephKM - steamcommunity.com/id/JosephKm/")
-        self.alerta_master_psw = QMessageBox(QMessageBox.NoIcon, "Ingrese su contraseña maestra", "")
-        '''
 
         # Botones
         self.ui.boton_guardar_config.clicked.connect(self.guardar_config)  # connect button clicked with action  # boton guardar config
@@ -180,9 +176,10 @@ class VentanaPrincipal(QTabWidget):
         self.ui.input_url.toPlainText()
         '''
         try:
-            pass
-            #self.query.exec_('INSERT INTO passwords (categoria, favicon, website, mail, username, contraseña) VALUES({},{},{},{},{},{})',format())
-            #self.db.commit()
+            with open("contraseñas.txt") as file:
+                file.append("""
+
+                    """)
         except Exception as ex:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
