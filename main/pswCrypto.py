@@ -32,11 +32,12 @@ def encriptar(mensaje, key):
 
 def descifrar(mensaje_encriptado, key):
 	f = Fernet(key)
-	try:
-		mensaje_descifrado = f.decrypt(mensaje_encriptado)
-		mensaje_descifrado = mensaje_descifrado.decode("utf-8")
-		return mensaje_descifrado
-	except InvalidToken as ex:
-		template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-		message = template.format(type(ex).__name__, ex.args)
-		return message
+	mensaje_descifrado = f.decrypt(mensaje_encriptado)
+	mensaje_descifrado = mensaje_descifrado.decode("utf-8")
+	return mensaje_descifrado
+	
+#	except InvalidToken as ex:
+#		template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+#		message = template.format(type(ex).__name__, ex.args)
+#		print(message)
+		

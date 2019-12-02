@@ -2,7 +2,7 @@ import sys
 from time import sleep
 
 from PySide2.QtWidgets import QApplication, QMainWindow, QTabWidget, QLineEdit, QMessageBox, QInputDialog, QDialog  # QLineEdit para input_psw
-from PySide2.QtCore import QFile
+from PySide2.QtCore import QFile, QByteArray
 from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
 
@@ -23,11 +23,12 @@ class VentanaPrincipal(QTabWidget):
 
         # Procesos iniciales
         self.cargar_config()
-        self.master_psw = None
+        self.master_key = None
 
         # Alertas
         self.alerta_config = QMessageBox(QMessageBox.Warning, "Problema con la configuración actual", "Existen dos posibilidades para este error:\n\n1. El archivo de configuración está dañando\n2. Usted tiene todas las opciones desmarcadas (el amor no cuenta)\n\nPara solucionarlo, borre el archivo de configuración ('opciones.ini'),\no marque alguna opción en la pestaña de configuración y guarde su selección\n")
         self.alerta_master_psw_mala = QMessageBox(QMessageBox.Warning, "Problema con la contraseña ingresada", "Por favor tome precauciones con la elección de la contraseña maestra.\nPara poder proseguir debe ingresar una contraseña con más de 5 y menos de 17 caracteres, o sino presione cancelar.")
+        self.alerta_master_psw_incorrecta = QMessageBox(QMessageBox.Warning, "Problema con la contraseña ingresada", "La contraseña que ingresaste es incorrecta")
             # Alertas con su propia UI
                 # Dialog info
         self.dialogo_info = QDialog()
@@ -166,23 +167,33 @@ class VentanaPrincipal(QTabWidget):
 
 
     def guardar_contraseña(self):
-        if self.master_psw is None:
-            self.master_psw = self.pedir_contraseña_maestra()
         '''
-        self.ui.input_psw.text()
         self.ui.comboBox_usuario.currentText()
         self.ui.comboBox_mail.currentText()
         self.ui.comboBox_categoria.currentText()
-        self.ui.input_url.toPlainText()
+        self.ui.input_url.text()
+        self.ui.input_psw.text()
         '''
+        if self.master_key is None:
+            try:
+                self.master_key = self.pedir_contraseña_maestra()
+            except Exception as e:
+                return
+
+        contraseña_ingresada_encriptada = QByteArray(pswCrypto.encriptar(self.ui.input_psw.text(), self.master_key))      
         try:
-            pass
-            #self.query.exec_('INSERT INTO passwords (categoria, favicon, website, mail, username, contraseña) VALUES({},{},{},{},{},{})',format())
-            #self.db.commit()
+            self.save_query = QSqlQuery()
+            self.save_query.prepare('INSERT INTO passwords (categoria, website, mail, username, contraseña) VALUES(?,?,?,?,?)')
+            self.save_query.addBindValue(self.ui.comboBox_categoria.currentText()) 
+            self.save_query.addBindValue(self.ui.input_url.text())
+            self.save_query.addBindValue(self.ui.comboBox_mail.currentText())
+            self.save_query.addBindValue(self.ui.comboBox_usuario.currentText())
+            self.save_query.addBindValue(contraseña_ingresada_encriptada)
+            self.save_query.exec_()
+            
         except Exception as ex:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
-            print(message)        
 
 
     def pedir_contraseña_maestra(self):
@@ -195,7 +206,7 @@ class VentanaPrincipal(QTabWidget):
 
         # Si le dio a cancelar
         if bool(self.dialogo_master_psw.result()) is False:
-            return "Accion canelada"
+            raise Exception("Accion canelada")
 
         # Comprobamos que cumpla requisitos
         if contraseña_maestra == "" or len(contraseña_maestra) < 6 or len(contraseña_maestra) >16:
@@ -204,25 +215,29 @@ class VentanaPrincipal(QTabWidget):
         
         # Encriptacion
         key_contraseña_maestra = pswCrypto.generar_key(contraseña_maestra) # La convertimos en una key
-        contraseña_maestra_encriptada = pswCrypto.encriptar(contraseña_maestra, key_contraseña_maestra) # Encriptamos la contraseña con la key
         # Verificacion
-        # Obtenemos la muestra guardada en la db
+            # Obtenemos la muestra guardada en la db
         muestra_db = backend.obtener_muestra_db()
-        # Si no habia guardamos una nueva con esta contraseña maestra
+                # Si no habia guardamos una nueva con esta contraseña maestra
         if muestra_db is None:
-            nueva_muestra = backend.generar_muestra(key_contraseña_maestra)
-            print(nueva_muestra)
+            print("No habia ninguna guardada")
+            array = QByteArray(backend.generar_muestra(key_contraseña_maestra))
             self.master_query = QSqlQuery()
-            self.master_query.exec_("INSERT INTO maestra (id, muestra) VALUES(1, ?)" (nueva_muestra))
-            print(self.db.lastError())
-            self.db.commit()
+            self.master_query.prepare("INSERT INTO maestra (id, muestra) VALUES(1, ?)")
+            self.master_query.addBindValue(array)
+            self.master_query.exec_()
 
-            # RETURN QUE?
+            return key_contraseña_maestra
+
         else:
             # Ahora si verificamos
-            print(type(muestra_db), type(key_contraseña_maestra)) 
             psw_correcta = backend.verificar_key(muestra_db, key_contraseña_maestra)
-            print(psw_correcta)
+            if psw_correcta is True:
+                return key_contraseña_maestra
+            else:
+                self.alerta_master_psw_incorrecta.exec_()
+                raise Exception("Contraseña maestra incorrecta")
+            #return self.master_key = contraseña_maestra
     
 
 if __name__ == "__main__":

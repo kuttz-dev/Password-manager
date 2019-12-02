@@ -8,6 +8,7 @@ import string
 import sqlite3
 import configparser
 from pyperclip import copy
+from cryptography.fernet import InvalidToken
 
 # Base de datos
 # ~~~~~~~~~~~~~
@@ -286,9 +287,17 @@ def generar_muestra(key):
 
 
 def verificar_key(muestra, key):
+    try:
+        muestra = descifrar(muestra, key)
+        return True
+    except InvalidToken:
+        return False
+
+    '''
     muestra = descifrar(muestra, key)
+    print(type(muestra))
     if muestra == "An exception of type InvalidToken occurred.":
         return False
     elif muestra is not None:
-        return True
+        return True'''
 

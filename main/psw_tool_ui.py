@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'psw_tool.ui',
 # licensing of 'psw_tool.ui' applies.
 #
-# Created: Sat Nov 30 04:15:25 2019
+# Created: Sun Dec  1 23:13:39 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -200,16 +200,14 @@ class Ui_TabWidget(object):
         self.etiqueta_url.setMaximumSize(QtCore.QSize(16777215, 20))
         self.etiqueta_url.setObjectName("etiqueta_url")
         self.vlayout_url.addWidget(self.etiqueta_url)
-        self.input_url = QtWidgets.QPlainTextEdit(self.tab_1)
+        self.input_url = QtWidgets.QLineEdit(self.tab_1)
         self.input_url.setMinimumSize(QtCore.QSize(0, 20))
         self.input_url.setMaximumSize(QtCore.QSize(16777215, 20))
-        self.input_url.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.input_url.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.input_url.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
+        self.input_url.setMouseTracking(False)
+        self.input_url.setInputMethodHints(QtCore.Qt.ImhNone)
         self.input_url.setObjectName("input_url")
         self.vlayout_url.addWidget(self.input_url)
         self.vlayout_url.setStretch(0, 50)
-        self.vlayout_url.setStretch(1, 50)
         self.hlayout_categoria_url.addLayout(self.vlayout_url)
         self.hlayout_categoria_url.setStretch(0, 50)
         self.hlayout_categoria_url.setStretch(1, 50)
