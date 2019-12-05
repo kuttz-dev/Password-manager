@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'dialogo_master_psw.ui',
 # licensing of 'dialogo_master_psw.ui' applies.
 #
-# Created: Sat Nov 30 04:15:25 2019
+# Created: Thu Dec  5 07:25:03 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!

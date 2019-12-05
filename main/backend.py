@@ -24,7 +24,7 @@ def conectar_db(db):
 def crear_tabla_contraseñas(conexion, cursor):
     # if favicon is True:
     try:
-        cursor.execute('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña BLOB);')
+        cursor.execute('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
         conexion.commit()
 
     except sqlite3.OperationalError as ex:
@@ -34,7 +34,7 @@ def crear_tabla_contraseñas(conexion, cursor):
     '''
     elif favicon is False:
         try:
-            cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, website TEXT, mail TEXT, username TEXT, contraseña BLOB);')
+            cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
             conexion.commit()
 
         except sqlite3.OperationalError as ex:
@@ -50,7 +50,7 @@ def checkear_tabla(cursor, db):
 
 def guardar(conexion, cursor, categoria, favicon, url, mail, usuario, contraseña):
     try:
-        cursor.execute('INSERT INTO passwords(categoria, favicon, website, mail, username, contraseña) VALUES(?, ?, ?, ?, ?)', (categoria, favicon, url, mail, usuario, contraseña))
+        cursor.execute('INSERT INTO passwords(categoria, favicon, web, mail, usuario, contraseña_encriptada) VALUES(?, ?, ?, ?, ?)', (categoria, favicon, url, mail, usuario, contraseña))
         conexion.commit()
     except Exception as ex:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
@@ -93,7 +93,7 @@ class BaseDeDatos(BackEnd):
         # if favicon is True:
         try:
             self.cursor.execute(
-                'CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, website TEXT, mail TEXT, username TEXT, contraseña BLOB);')
+                'CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
             self.conexion.commit()
 
         except sqlite3.OperationalError as ex:
@@ -103,7 +103,7 @@ class BaseDeDatos(BackEnd):
         '''
         elif favicon is False:
             try:
-                cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, website TEXT, mail TEXT, username TEXT, contraseña BLOB);')
+                cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
                 conexion.commit()
 
             except sqlite3.OperationalError as ex:

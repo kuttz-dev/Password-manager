@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'dialogo_informacion.ui',
 # licensing of 'dialogo_informacion.ui' applies.
 #
-# Created: Sat Nov 30 04:15:25 2019
+# Created: Thu Dec  5 07:25:03 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -108,7 +108,7 @@ class Ui_dialogo_info(object):
     def retranslateUi(self, dialogo_info):
         dialogo_info.setWindowTitle(QtWidgets.QApplication.translate("dialogo_info", "Información", None, -1))
         self.etiqueta_titulo.setText(QtWidgets.QApplication.translate("dialogo_info", "<html><head/><body><p>Psw-manager by Küttz</p></body></html>", None, -1))
-        self.etiqueta_descripccion.setText(QtWidgets.QApplication.translate("dialogo_info", "<html><head/><body><p>Este proyecto es un trabajo en curso desarrollado únicamente por mi utilizando python. Seria genial si podes aportar a este proyecto revisando el código en github, comentando, encontrando errores, etc. Podes encontrarme en mi servidor de discord o a través de mi cuenta de steam dejando un comentario.</p><p>Algunos de los iconos pertenecen a Smashicons, Iconnice y Freepik a traves de flaticon.com</p><p>Agradecimientos especiales a Roja</p></body></html>", None, -1))
+        self.etiqueta_descripccion.setText(QtWidgets.QApplication.translate("dialogo_info", "<html><head/><body><p>Este proyecto es un trabajo en curso desarrollado únicamente por mi utilizando python. Seria genial si podes aportar a este proyecto revisando el código en github, comentando, encontrando errores, etc. Podes encontrarme en mi servidor de discord o a través de mi cuenta de steam dejando un comentario.</p><p>Algunos de los iconos pertenecen a Smashicons, Iconnice, Vignesh Oviyan y Freepik a traves de flaticon.com</p><p>Agradecimientos especiales a Roja</p></body></html>", None, -1))
 
 import resources_rc
 

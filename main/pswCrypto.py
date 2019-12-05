@@ -3,7 +3,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet, InvalidToken
-
+import timeit
+from PySide2.QtCore import QByteArray
 
 def generar_key(contraseña):
 	contraseña = contraseña.encode()  # Convert to type bytes
