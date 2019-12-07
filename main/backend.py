@@ -1,5 +1,6 @@
 from pswCrypto import generar_key, encriptar, descifrar
 from urllib import request
+from webbrowser import open as webOpen
 from random import choice
 from os import remove
 from os.path import isfile
@@ -24,7 +25,7 @@ def conectar_db(db):
 def crear_tabla_contraseñas(conexion, cursor):
     # if favicon is True:
     try:
-        cursor.execute('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
+        cursor.execute('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
         conexion.commit()
 
     except sqlite3.OperationalError as ex:
@@ -34,7 +35,7 @@ def crear_tabla_contraseñas(conexion, cursor):
     '''
     elif favicon is False:
         try:
-            cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
+            cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
             conexion.commit()
 
         except sqlite3.OperationalError as ex:
@@ -48,9 +49,9 @@ def checkear_tabla(cursor, db):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='{}';".format(db))
 
 
-def guardar(conexion, cursor, categoria, favicon, url, mail, usuario, contraseña):
+def guardar(conexion, cursor, categoria, favicon, servicio, mail, usuario, contraseña):
     try:
-        cursor.execute('INSERT INTO passwords(categoria, favicon, web, mail, usuario, contraseña_encriptada) VALUES(?, ?, ?, ?, ?)', (categoria, favicon, url, mail, usuario, contraseña))
+        cursor.execute('INSERT INTO passwords(categoria, favicon, servicio, mail, usuario, contraseña_encriptada) VALUES(?, ?, ?, ?, ?)', (categoria, favicon, servicio, mail, usuario, contraseña))
         conexion.commit()
     except Exception as ex:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
@@ -79,42 +80,12 @@ def obtener_muestra_db():
 
 # Otra seccion
 # ~~~~~~~~~~~~~
-class BackEnd:
-    def __init__(self, nombre_db):
-        self.conexion = sqlite3.connect(self.nombre_db)
-        self.cursor = self.conexion.cursor()
-
-
-class BaseDeDatos(BackEnd):
-    # Nombre, conexion y cursor, y opciones
-
-
-    def crear_tabla_contraseñas(self, conexion, cursor):
-        # if favicon is True:
-        try:
-            self.cursor.execute(
-                'CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
-            self.conexion.commit()
-
-        except sqlite3.OperationalError as ex:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(ex).__name__, ex.args)
-            print(message)
-        '''
-        elif favicon is False:
-            try:
-                cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
-                conexion.commit()
-
-            except sqlite3.OperationalError as ex:
-                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
-                print(message)
-        '''
-
-
 def string2bool(s):
     return s == "True"
+
+
+def abrir_link(url):
+    webOpen(url)
 
 
 def generar_contraseña(largo: int=13, mayus=True, minus=True, numeros=True, special=True):
@@ -166,13 +137,16 @@ def descargar_favico(url):
         return None
         
     nombre = re.search(r"(www\.)?(?P<nombre_pagina>[\w\d\-@:%\._\+~#=]{2,256})(?P<terminacion>\.\w{2,6})", url)
+    if nombre is None:
+        return None
+
     link = nombre.group("nombre_pagina") + nombre.group("terminacion")
     nombre = nombre.group("nombre_pagina")
     # Para poder guardarlo
     if "." in nombre:
         nombre = nombre.replace(".", "-")
     # Lugar donde se guarda el archivo    
-    favicon = "imagenes/{}.ico".format(nombre)
+    favicon = "media/favicons/{}.ico".format(nombre)
     # Conseguimos el ico con la API    
     try:
         favicon_a_descargar = request.urlopen("http://favicongrabber.com/api/grab/{}".format(link)).read()
@@ -185,14 +159,14 @@ def descargar_favico(url):
     favicon_a_descargar = re.search(r'("src":)?."(?P<fav_icon>[\w\-@:%\._\+~#=\/]+\.ico)"', str(favicon_a_descargar))
    
     if favicon_a_descargar is None:
-        try:
-            raise SyntaxError("El siguiente url no tuvo resultados regex, url: {}".format(url))
-        except Exception as e:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(e).__name__, e.args)
-            print(message)
             return None
             # Hacer un archivo de registro
+            #try:
+            #    raise SyntaxError("El siguiente url no tuvo resultados regex, url: {}".format(url))
+            #except Exception as e:
+            #    template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            #    message = template.format(type(e).__name__, e.args)
+            #    print(message)
 
     favicon_a_descargar = favicon_a_descargar.group("fav_icon")
     # Lo descargamos y guardamos
@@ -200,7 +174,7 @@ def descargar_favico(url):
         try:
             imagen.write(request.urlopen(favicon_a_descargar).read())
             # Devolvemos el directorio donde se guarda la imagen
-            print(url)
+            #print(url)
             return favicon
 
         except Exception as e:
@@ -208,7 +182,7 @@ def descargar_favico(url):
             try:
                 imagen.close()
                 borrar_favico(favicon)
-                return None
+                raise Exception("El url si era valido, pero no se consiguio favicon")
             except:
                 print("Algo salio demasaido mal")
     print(url)

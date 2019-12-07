@@ -3,7 +3,7 @@ import sys
 from PySide2.QtWidgets import QApplication, QTabWidget, QLineEdit, QMessageBox, QDialog, QHeaderView, QComboBox
 from PySide2.QtCore import QFile, QByteArray, Qt
 from PySide2.QtGui import QIcon, QPixmap
-from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
+from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel, QSqlField
 
 
 from psw_tool_ui import Ui_TabWidget
@@ -28,7 +28,7 @@ class VentanaPrincipal(QTabWidget):
         self.conector = QSqlDatabase.database()
         self.query = QSqlQuery()
         self.query.exec_(
-            'CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY ASC, categoria TEXT, favicon BLOB, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
+            'CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY ASC, categoria TEXT, favicon BLOB, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
         )
         self.query.exec_(
             'CREATE TABLE IF NOT EXISTS maestra (id INTEGER PRIMARY KEY, muestra BLOB);'
@@ -41,7 +41,6 @@ class VentanaPrincipal(QTabWidget):
         self.model = QSqlTableModel()
         self.organizar_tabla_ui()
         self.model.setEditStrategy(QSqlTableModel.OnManualSubmit)  # Va aca abajo por self.model.setTable('passwords')
-        # print(self.model.rowCount())
             # Querys
         self.master_query = QSqlQuery()
         self.save_query = QSqlQuery()
@@ -64,15 +63,18 @@ class VentanaPrincipal(QTabWidget):
         self.icon_editar.addPixmap(QPixmap(":/media/iconografia/document.png"), QIcon.Normal, QIcon.Off)
         self.icon_guardar = QIcon()
         self.icon_guardar.addPixmap(QPixmap(":/media/iconografia/save.png"), QIcon.Normal, QIcon.Off)
-        
+        self.test = QIcon()
+
         # Procesos iniciales
         self.cargar_config()
         self.master_key = None
         self.seguridad_alterada = False
         self.candado = "cerrado"
         self.modo_boton_editar_guardar = "editar"
-        self.cargar_opciones_comboBoxes()
+        self.contrasenas_nuevas = {}
+        self.edits = {}
         self.revisar_columna_contrasenas()
+        self.cargar_opciones_comboBoxes()
         # Alertas
             # Iconos para las alertas sin UI
         self.icon_ventana = QIcon()
@@ -125,6 +127,10 @@ class VentanaPrincipal(QTabWidget):
         self.ui.boton_filtro.clicked.connect(lambda: self.filtrar())
         self.ui.boton_editar.clicked.connect(lambda: self.gestor_boton_editar_guardar())
         self.ui.boton_seguridad.clicked.connect(lambda: self.mostrar_contrasenas())
+            # Botones Info
+        self.info_app.boton_steam.clicked.connect(lambda: backend.abrir_link("https://steamcommunity.com/id/JosephKm"))
+        self.info_app.boton_discord.clicked.connect(lambda: backend.abrir_link("https://discord.gg/wYuXPQS"))
+        self.info_app.boton_github.clicked.connect(lambda: backend.abrir_link("https://github.com/kuttz-dev/Password-manager"))
         # Si se presiona la pestaña de configuracion
         # self.ui.tab_3.connect(self.cargar_config)
         # SETEAR COMBOBOXES
@@ -139,6 +145,8 @@ class VentanaPrincipal(QTabWidget):
         self.ui.comboBox_categoria.clearEditText ()
         # Para cuando se cambian datos
         self.model.dataChanged.connect(self.celdasCambiadas)
+        #a = self.model.column(2).data()
+        #print(a)
 
     def cargar_config(self):
         largo, mayus, minus, numeros, special, favicon = backend.obtener_cfg()
@@ -222,6 +230,19 @@ class VentanaPrincipal(QTabWidget):
         if numero_boton == 3:
             backend.copiar(str(self.ui.comboBox_mail.currentText()))
 
+    def preparar_favicon(self, url):
+        try:
+            archivo_ico = backend.descargar_favico(url)
+        except Exception:  # Si lo que se ingreso era un link pero no se consigui favicon
+            with open("media/favicons/domain.ico") as ico:
+                print("Estamos aqui")
+                return QByteArray(ico.read())
+        # Si no se consiguio la imagen
+        if archivo_ico is None:
+            return None
+        with open(archivo_ico, "rb") as ico:
+            return QByteArray(ico.read())
+
     def guardar_contrasena(self):
         # self.ui.comboBox_usuario.currentText() / self.ui.comboBox_mail.currentText()
         # self.ui.comboBox_categoria.currentText() / self.ui.input_url.text()
@@ -238,10 +259,13 @@ class VentanaPrincipal(QTabWidget):
             contrasena_ingresada_encriptada = ""
         
         try:
+            fav_icon = self.preparar_favicon(self.ui.input_url.text())
+
             self.save_query.prepare(
-                'INSERT INTO passwords (categoria, web, mail, usuario, contraseña_encriptada) VALUES(?,?,?,?,?)'
+                'INSERT INTO passwords (categoria, favicon, servicio, mail, usuario, contraseña_encriptada) VALUES(?,?,?,?,?,?)'
             )
             self.save_query.addBindValue(self.ui.comboBox_categoria.currentText())
+            self.save_query.addBindValue(fav_icon)
             self.save_query.addBindValue(self.ui.input_url.text())
             self.save_query.addBindValue(self.ui.comboBox_mail.currentText())
             self.save_query.addBindValue(self.ui.comboBox_usuario.currentText())
@@ -300,6 +324,7 @@ class VentanaPrincipal(QTabWidget):
             # return self.master_key = contrasena_maestra
 
     def filtrar(self):
+        '''
         indice_combo = self.ui.combobox_filtro.currentIndex()
         # Filtrar segun comboBox
             # Por categoria
@@ -311,7 +336,7 @@ class VentanaPrincipal(QTabWidget):
             # Por mail
         if indice_combo == 2:
             self.model.setSort(4, Qt.AscendingOrder)
-            # Por web
+            # Por servicio
         elif indice_combo == 3:
             self.model.setSort(3, Qt.AscendingOrder)
         # Filtrar segun texto
@@ -323,7 +348,7 @@ class VentanaPrincipal(QTabWidget):
             self.model.setFilter('{} LIKE "{}"'.format(filtrar_por_categoria, filtrar_por_texto))
 
         self.model.orderByClause()
-        self.model.select()
+        self.model.select()'''
 
     def mostrar_contrasenas(self):
         if self.master_key is None:
@@ -358,20 +383,23 @@ class VentanaPrincipal(QTabWidget):
 
     def borrar_columna_contrasenas(self):
         self.query.exec_(
-            'CREATE TABLE temporal (id INTEGER PRIMARY KEY ASC, categoria TEXT, favicon BLOB, web TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
+            'DROP TABLE IF EXISTS temporal'
+        )
+        self.query.exec_(
+            'CREATE TABLE temporal (id INTEGER PRIMARY KEY ASC, categoria TEXT, favicon BLOB, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
         )
         self.popular.exec_(
-            'INSERT INTO temporal(id, categoria, favicon, web, mail, usuario, contraseña_encriptada) SELECT id, categoria, favicon, web, mail, usuario, contraseña_encriptada FROM passwords'
+            'INSERT INTO temporal(id, categoria, favicon, servicio, mail, usuario, contraseña_encriptada) SELECT id, categoria, favicon, servicio, mail, usuario, contraseña_encriptada FROM passwords'
         )
         self.db.commit()
         self.query.exec_(
-            'DROP TABLE passwords'
+            'DROP TABLE IF EXISTS passwords'
         )
         self.popular.exec_(
             'ALTER TABLE temporal RENAME TO passwords'
         )
         self.query.exec_(
-            'DROP TABLE IF EXIST temporal'
+            'DROP TABLE IF EXISTS temporal'
         )
         self.db.commit()
         return self.organizar_tabla_ui()
@@ -386,11 +414,11 @@ class VentanaPrincipal(QTabWidget):
             
     def organizar_tabla_ui(self):
         self.model.setTable('passwords')
-        self.model.removeColumn(6) # Sacamos las contraseñas encriptadas
         self.model.setSort(1, Qt.AscendingOrder)
         self.model.select()
         self.ui.tabla_db.setModel(self.model)
-        self.ui.tabla_db.hideColumn(0) # Escondemos ID        
+        self.ui.tabla_db.hideColumn(6) # Escondemos las contraseñas encriptadas
+        self.ui.tabla_db.hideColumn(0) # Escondemos id        
         self.ui.tabla_db.setWindowTitle("Lista de cuentas")
         # Tamaño columnas
         self.ui.tabla_db.resizeColumnsToContents()
@@ -398,6 +426,7 @@ class VentanaPrincipal(QTabWidget):
         #self.ui.tabla_db.horizontalHeader().setSectionsClickable(False)
         self.ui.tabla_db.verticalHeader().setVisible(False)
         # self.ui.tabla_db.horizontalHeader().setSortIndicator(2, Qt.AscendingOrder)
+        self.ui.tabla_db.setSortingEnabled(True)
 
     def cargar_opciones_comboBoxes(self):
         a = self.ui.comboBox_categoria.currentText()
@@ -439,6 +468,7 @@ class VentanaPrincipal(QTabWidget):
     def revisar_columna_contrasenas(self, borrar = True):
         existe = self.verificar_columna_contrasenas.exec_('SELECT contraseña FROM passwords LIMIT 1')
         if existe is True and borrar is True:
+            self.verificar_columna_contrasenas.finish()
             return self.borrar_columna_contrasenas()
         elif existe is True:
             return "Existe"
@@ -453,10 +483,13 @@ class VentanaPrincipal(QTabWidget):
             return self.ui.boton_editar.setIcon(self.icon_guardar)
 
         elif self.modo_boton_editar_guardar == "guardar":
-            self.modo_boton_editar_guardar = "editar" # Cambiamos al proximo modo
+            self.borrar_columna_contrasenas()
+            self.candado = "cerrado"
             self.ui.boton_seguridad.setDisabled(False)
             self.ui.boton_seguridad.setIcon(self.icon_seguridad)
-            return self.ui.boton_editar.setIcon(self.icon_editar)
+            self.ui.boton_editar.setIcon(self.icon_editar)
+            self.modo_boton_editar_guardar = "editar" # Cambiamos al proximo modo
+            return
 
     def editar_tabla_ui(self):
         if self.master_key is None:
@@ -465,19 +498,28 @@ class VentanaPrincipal(QTabWidget):
             except Exception:
                 raise Exception("No se pudo conseguir master key")
         if self.candado == "cerrado":
-            try:
-                self.mostrar_contrasenas()
-                self.ui.boton_seguridad.setDisabled(True)
-            except Exception:
-                return
+            self.ui.boton_seguridad.setDisabled(True)
+            self.mostrar_contrasenas()
 
     def celdasCambiadas(self, topLeft, bottomRight):
         if self.modo_boton_editar_guardar == "editar":
             return
         else:
-            print(self.model.record(topLeft.row()).value(0))
-            self.model.updateRowInTable(topLeft.row(), self.model.record(topLeft.row()))
-            self.db.commit()
+            if topLeft.column() == 7:
+                contrasena_editada_encriptada = QByteArray(pswCrypto.encriptar(self.model.record(topLeft.row()).value('contraseña'), self.master_key))
+                casilla_editada = QSqlField("contraseña_encriptada")
+                casilla_editada.setValue(contrasena_editada_encriptada)
+                valores_fila = self.model.record(topLeft.row())
+                valores_fila.replace(6, casilla_editada)
+                return self.model.updateRowInTable(topLeft.row(), valores_fila)
+            else:
+                self.model.updateRowInTable(topLeft.row(), self.model.record(topLeft.row()))
+                return self.db.commit()
+
+    def mostrar_iconos_tabla(self):
+        for registro in self.model.rowCount():
+            pass
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

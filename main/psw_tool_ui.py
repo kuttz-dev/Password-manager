@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'psw_tool.ui',
 # licensing of 'psw_tool.ui' applies.
 #
-# Created: Thu Dec  5 07:25:03 2019
+# Created: Thu Dec  5 08:09:26 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -223,8 +223,8 @@ class Ui_TabWidget(object):
         font.setPointSize(10)
         self.boton_guardar.setFont(font)
         self.boton_guardar.setCursor(QtCore.Qt.PointingHandCursor)
-        self.boton_guardar.setAutoDefault(True)
-        self.boton_guardar.setDefault(True)
+        self.boton_guardar.setAutoDefault(False)
+        self.boton_guardar.setDefault(False)
         self.boton_guardar.setObjectName("boton_guardar")
         self.verticalLayout_2.addWidget(self.boton_guardar)
         icon3 = QtGui.QIcon()
@@ -262,8 +262,8 @@ class Ui_TabWidget(object):
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap(":/media/iconografia/search.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.boton_filtro.setIcon(icon5)
-        self.boton_filtro.setAutoDefault(True)
-        self.boton_filtro.setDefault(True)
+        self.boton_filtro.setAutoDefault(False)
+        self.boton_filtro.setDefault(False)
         self.boton_filtro.setFlat(False)
         self.boton_filtro.setObjectName("boton_filtro")
         self.horizontalLayout.addWidget(self.boton_filtro)
