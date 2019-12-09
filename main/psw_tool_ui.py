@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'psw_tool.ui',
 # licensing of 'psw_tool.ui' applies.
 #
-# Created: Thu Dec  5 08:09:26 2019
+# Created: Mon Dec  9 00:52:52 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -269,6 +269,7 @@ class Ui_TabWidget(object):
         self.horizontalLayout.addWidget(self.boton_filtro)
         self.boton_editar = QtWidgets.QPushButton(self.tab_2)
         self.boton_editar.setCursor(QtCore.Qt.PointingHandCursor)
+        self.boton_editar.setStatusTip("")
         self.boton_editar.setText("")
         icon6 = QtGui.QIcon()
         icon6.addPixmap(QtGui.QPixmap(":/media/iconografia/document.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -384,7 +385,8 @@ class Ui_TabWidget(object):
         self.etiqueta_mail.setText(QtWidgets.QApplication.translate("TabWidget", "Mail:", None, -1))
         self.cp3.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Copiar el mail", None, -1))
         self.etiqueta_categoria.setText(QtWidgets.QApplication.translate("TabWidget", "Categoria:", None, -1))
-        self.etiqueta_url.setText(QtWidgets.QApplication.translate("TabWidget", "Pagina web:", None, -1))
+        self.etiqueta_url.setText(QtWidgets.QApplication.translate("TabWidget", "Servicio:", None, -1))
+        self.input_url.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Ingrese una pagina web, aplicacion, o juego.", None, -1))
         self.boton_guardar.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Guardar en la base de datos la informacion encriptada con la contraseña maestra", None, -1))
         self.boton_guardar.setText(QtWidgets.QApplication.translate("TabWidget", "GUARDAR", None, -1))
         TabWidget.setTabText(TabWidget.indexOf(self.tab_1), QtWidgets.QApplication.translate("TabWidget", "Panel principal", None, -1))
@@ -393,10 +395,10 @@ class Ui_TabWidget(object):
         self.combobox_filtro.setItemText(0, QtWidgets.QApplication.translate("TabWidget", "Categoria", None, -1))
         self.combobox_filtro.setItemText(1, QtWidgets.QApplication.translate("TabWidget", "Usuario", None, -1))
         self.combobox_filtro.setItemText(2, QtWidgets.QApplication.translate("TabWidget", "Mail", None, -1))
-        self.combobox_filtro.setItemText(3, QtWidgets.QApplication.translate("TabWidget", "Web", None, -1))
+        self.combobox_filtro.setItemText(3, QtWidgets.QApplication.translate("TabWidget", "Servicio", None, -1))
         self.input_filtro.setToolTip(QtWidgets.QApplication.translate("TabWidget", "<html><head/><body><p>Introduzca el texto para buscar exactamente</p></body></html>", None, -1))
         self.boton_filtro.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Establezca un filtro", None, -1))
-        self.boton_editar.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Pulse este boton para editar entradas de la base de datos", None, -1))
+        self.boton_editar.setToolTip(QtWidgets.QApplication.translate("TabWidget", "Pulse este boton para alternar entre el modo de edicion de datos.", None, -1))
         TabWidget.setTabText(TabWidget.indexOf(self.tab_2), QtWidgets.QApplication.translate("TabWidget", "Base de datos", None, -1))
         self.grupo_opciones_psw.setTitle(QtWidgets.QApplication.translate("TabWidget", "Opciones para la formacion de la contraseña:", None, -1))
         self.check_caracteres.setText(QtWidgets.QApplication.translate("TabWidget", "Caracteres especiales: !%_-@#", None, -1))

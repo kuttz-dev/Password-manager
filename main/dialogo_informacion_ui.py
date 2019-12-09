@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'dialogo_informacion.ui',
 # licensing of 'dialogo_informacion.ui' applies.
 #
-# Created: Thu Dec  5 07:25:03 2019
+# Created: Mon Dec  9 00:52:52 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -93,6 +93,8 @@ class Ui_dialogo_info(object):
         self.hlayout_principal.setStretch(1, 80)
         self.verticalLayout.addLayout(self.hlayout_principal)
         self.buttonBox = QtWidgets.QDialogButtonBox(dialogo_info)
+        self.buttonBox.setAccessibleName("")
+        self.buttonBox.setAccessibleDescription("")
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Close)
         self.buttonBox.setObjectName("buttonBox")

@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'dialogo_master_psw.ui',
 # licensing of 'dialogo_master_psw.ui' applies.
 #
-# Created: Thu Dec  5 07:25:03 2019
+# Created: Mon Dec  9 00:52:52 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -91,7 +91,7 @@ class Ui_dialogo_master_psw(object):
     def retranslateUi(self, dialogo_master_psw):
         dialogo_master_psw.setWindowTitle(QtWidgets.QApplication.translate("dialogo_master_psw", "Contraseña maestra", None, -1))
         self.label.setWhatsThis(QtWidgets.QApplication.translate("dialogo_master_psw", "Una vez que ingrese la contraseña maestra, la contraseña que completo será encriptada con esta y guardad en la base de datos. Se usará una única contraseña encriptada por base de datos.", None, -1))
-        self.label.setText(QtWidgets.QApplication.translate("dialogo_master_psw", "<html><head/><body><p><a name=\"docs-internal-guid-18a17bac-7fff-5834-6fea-9c7cb4c38644\"/><span style=\"color:#000000; background-color:transparent;\">E</span><span style=\"color:#000000; background-color:transparent;\">sta contraseña le dará acceso al resto, por favor considere severamente cual usará y recuerde no perderla, sino sus contraseñas serán irrecuperables.</span></p><p><span style=\" color:#000000; background-color:transparent;\">Contraseña maestra:</span></p></body></html>", None, -1))
+        self.label.setText(QtWidgets.QApplication.translate("dialogo_master_psw", "<html><head/><body><p><span style=\" color:#000000; background-color:transparent;\">La contraseña maestra le dará acceso al resto, por favor considere severamente cual usará y recuerde no perderla, sino sus contraseñas serán irrecuperables.</span></p><p><span style=\" color:#000000; background-color:transparent;\">Contraseña maestra:</span></p></body></html>", None, -1))
         self.input_master_psw.setToolTip(QtWidgets.QApplication.translate("dialogo_master_psw", "(6 -16 caracteres)", None, -1))
         self.reveal_master_psw.setToolTip(QtWidgets.QApplication.translate("dialogo_master_psw", "Revelar u esconder contraseña", None, -1))
 

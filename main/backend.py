@@ -1,63 +1,49 @@
-from pswCrypto import generar_key, encriptar, descifrar
-from urllib import request
-from webbrowser import open as webOpen
-from random import choice
 from os import remove
 from os.path import isfile
 import re
 import string
 import sqlite3
+
 import configparser
+from urllib import request
+from webbrowser import open as web_open
+from random import choice
 from pyperclip import copy
+
+from PySide2.QtSql import QSqlDatabase, QSqlQuery
+
 from cryptography.fernet import InvalidToken
+from pswCrypto import generar_key, encriptar, descifrar
+
 
 # Base de datos
 # ~~~~~~~~~~~~~
 def conectar_db(db):
     try:
-        conexion = sqlite3.connect(db)
-        cursor = conexion.cursor()
+
         return conexion, cursor
-    except Error as e:
+    except Exception as e:
         print(e)
 
+def obtener_muestra_db():
+    conexion = sqlite3.connect("cuentas.db")
+    cursor = conexion.cursor()    
+    muestra_db = cursor.execute('SELECT muestra FROM maestra WHERE id = 1')
+    muestra_db = muestra_db.fetchone()
+    # Devolvemos
+    if muestra_db is None:
+        return None
+    else:
+        return muestra_db[0]
 
-def crear_tabla_contraseñas(conexion, cursor):
-    # if favicon is True:
+def guardar(conexion, cursor, categoria, icono, servicio, mail, usuario, contraseña):
     try:
-        cursor.execute('CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY, categoria TEXT, favicon TEXT, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
-        conexion.commit()
-
-    except sqlite3.OperationalError as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-    '''
-    elif favicon is False:
-        try:
-            cursor.execute('CREATE TABLE passwords (id INTEGER PRIMARY KEY, categoria TEXT, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);')
-            conexion.commit()
-
-        except sqlite3.OperationalError as ex:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(ex).__name__, ex.args)
-            print(message)
-    '''
-
-
-def checkear_tabla(cursor, db):
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='{}';".format(db))
-
-
-def guardar(conexion, cursor, categoria, favicon, servicio, mail, usuario, contraseña):
-    try:
-        cursor.execute('INSERT INTO passwords(categoria, favicon, servicio, mail, usuario, contraseña_encriptada) VALUES(?, ?, ?, ?, ?)', (categoria, favicon, servicio, mail, usuario, contraseña))
+        cursor.execute('INSERT INTO passwords(categoria, icono, servicio, mail, usuario, contraseña_encriptada) VALUES(?, ?, ?, ?, ?)', (categoria, icono, servicio, mail, usuario, contraseña))
         conexion.commit()
     except Exception as ex:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(ex).__name__, ex.args)
         print(message)
-
 
 def obtener_columna(cursor, columna):
     cursor.execute("SELECT {} FROM passwords".format(columna))
@@ -68,24 +54,17 @@ def obtener_columna(cursor, columna):
     return resultados
 
 
-def obtener_muestra_db():
-    conexcion, cursor = conectar_db("cuentas.db")
-    muestra_db = cursor.execute('SELECT muestra FROM maestra WHERE id = 1')
-    muestra_db = muestra_db.fetchone()
-    # Devolvemos
-    if muestra_db is None:
-        return None
-    else:
-        return muestra_db[0]
 
-# Otra seccion
+
+
+# Funcionalidad general
 # ~~~~~~~~~~~~~
 def string2bool(s):
     return s == "True"
 
 
 def abrir_link(url):
-    webOpen(url)
+    web_open(url)
 
 
 def generar_contraseña(largo: int=13, mayus=True, minus=True, numeros=True, special=True):
@@ -146,7 +125,7 @@ def descargar_favico(url):
     if "." in nombre:
         nombre = nombre.replace(".", "-")
     # Lugar donde se guarda el archivo    
-    favicon = "media/favicons/{}.ico".format(nombre)
+    icono = "media/favicons/{}.ico".format(nombre)
     # Conseguimos el ico con la API    
     try:
         favicon_a_descargar = request.urlopen("http://favicongrabber.com/api/grab/{}".format(link)).read()
@@ -170,19 +149,19 @@ def descargar_favico(url):
 
     favicon_a_descargar = favicon_a_descargar.group("fav_icon")
     # Lo descargamos y guardamos
-    with open(favicon, "wb") as imagen:
+    with open(icono, "wb") as imagen:
         try:
             imagen.write(request.urlopen(favicon_a_descargar).read())
             # Devolvemos el directorio donde se guarda la imagen
             #print(url)
-            return favicon
+            return icono
 
         except Exception as e:
             print("Error guardando el favcion de url: {} | Error: {}".format(url, e))
             try:
                 imagen.close()
-                borrar_favico(favicon)
-                raise Exception("El url si era valido, pero no se consiguio favicon")
+                borrar_favico(icono)
+                raise Exception("El url si era valido, pero no se consiguio icono")
             except:
                 print("Algo salio demasaido mal")
     print(url)
@@ -195,14 +174,14 @@ def borrar_favico(archivo):
         print(e)
 
 
-def generar_cfg(largo: int =13, mayus=True, minus=True, numeros=True, special=True, favicon=True):
+def generar_cfg(largo: int =13, mayus=True, minus=True, numeros=True, special=True, icono=True):
     cfg = configparser.ConfigParser()
     cfg['OPCIONES'] = {'largo': largo,
                       'mayus': mayus,
                       'minus': minus,
                       'numeros': numeros,
                       'special': special,
-                      'favicon': favicon}
+                      'icono': icono}
 
     with open("opciones.ini", "w") as configfile:
         cfg.write(configfile)
@@ -221,7 +200,7 @@ def obtener_cfg():
         minus = cfg['OPCIONES']['minus']
         numeros = cfg['OPCIONES']['numeros']
         special = cfg['OPCIONES']['special']
-        favicon = cfg['OPCIONES']['favicon']
+        icono = cfg['OPCIONES']['icono']
 
     except configparser.MissingSectionHeaderError as HeaderError:
         generar_cfg()
@@ -234,14 +213,14 @@ def obtener_cfg():
         largo = int(largo)
 
     except ValueError as verror:
-        generar_cfg(13, mayus, minus, numeros, special, favicon)
+        generar_cfg(13, mayus, minus, numeros, special, icono)
         return obtener_cfg()
 
     if int(largo) < 4 or int(largo) > 16:
-        generar_cfg(13, mayus, minus, numeros, special, favicon)
+        generar_cfg(13, mayus, minus, numeros, special, icono)
         return obtener_cfg()    
 
-    return largo, mayus, minus, numeros, special, favicon
+    return largo, mayus, minus, numeros, special, icono
 
 
 def editar_cfg(categoria, argumento, valor):

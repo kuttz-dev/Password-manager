@@ -12,6 +12,7 @@ from dialogo_master_psw_ui import Ui_dialogo_master_psw
 
 import backend
 import pswCrypto
+import pswItemDelegate
 
 
 class VentanaPrincipal(QTabWidget):
@@ -21,27 +22,13 @@ class VentanaPrincipal(QTabWidget):
         self.ui = Ui_TabWidget()
         self.ui.setupUi(self)
 
-        # BASE DE DATOS
+        # DB
         self.db = QSqlDatabase.addDatabase("QSQLITE")
         self.db.setDatabaseName("cuentas.db")
-        # db.setPassword(str(self.master_pasw))
         self.conector = QSqlDatabase.database()
-        self.query = QSqlQuery()
-        self.query.exec_(
-            'CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY ASC, categoria TEXT, favicon BLOB, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
-        )
-        self.query.exec_(
-            'CREATE TABLE IF NOT EXISTS maestra (id INTEGER PRIMARY KEY, muestra BLOB);'
-        )
-        self.query.exec_(
-            'DELETE FROM passwords WHERE usuario = "" AND mail = "" AND contraseña_encriptada = ""'
-        )
-        self.db.commit()
-        #  BASE DE DATOS en UI
-        self.model = QSqlTableModel()
-        self.organizar_tabla_ui()
-        self.model.setEditStrategy(QSqlTableModel.OnManualSubmit)  # Va aca abajo por self.model.setTable('passwords')
-            # Querys
+        self.general_query = QSqlQuery()   
+        self.organizar_db()
+        # Querys para psw_tool
         self.master_query = QSqlQuery()
         self.save_query = QSqlQuery()
         self.passwords_query_retrieve = QSqlQuery()
@@ -51,8 +38,18 @@ class VentanaPrincipal(QTabWidget):
         self.comboBoxes_query_mail = QSqlQuery()
         self.comboBoxes_query_usuario = QSqlQuery()        
         self.verificar_columna_contrasenas = QSqlQuery()
+        self.filtro = QSqlQuery()
+        # Querys para pswItemDelegate
+        self.all_data = QSqlQuery()
+        #  BASE DE DATOS en UI
+        self.model = QSqlTableModel()  # pswItemDelegate.CustomSqlModel()
+        self.organizar_tabla_ui()
+        self.model.setEditStrategy(QSqlTableModel.OnManualSubmit)  # Va aca abajo por self.model.setTable('passwords')
+            # Para cuando se cambian datos
+        self.model.dataChanged.connect(self.celdasCambiadas)
+
         # Filtro DB
-        #.connect(lambda: self.
+        # .connect(lambda: self.
         self.tabBarClicked.connect(self.actualizar_tabs)
         # Iconos DB en UI
         self.icon_seguridad = QIcon()
@@ -63,7 +60,6 @@ class VentanaPrincipal(QTabWidget):
         self.icon_editar.addPixmap(QPixmap(":/media/iconografia/document.png"), QIcon.Normal, QIcon.Off)
         self.icon_guardar = QIcon()
         self.icon_guardar.addPixmap(QPixmap(":/media/iconografia/save.png"), QIcon.Normal, QIcon.Off)
-        self.test = QIcon()
 
         # Procesos iniciales
         self.cargar_config()
@@ -143,19 +139,51 @@ class VentanaPrincipal(QTabWidget):
         self.ui.comboBox_usuario.clearEditText ()
         self.ui.comboBox_mail.clearEditText ()
         self.ui.comboBox_categoria.clearEditText ()
-        # Para cuando se cambian datos
-        self.model.dataChanged.connect(self.celdasCambiadas)
-        #a = self.model.column(2).data()
-        #print(a)
+        #print(self.model.flags(self.model.index(0,2)))
+
+
+    def organizar_db(self):
+        self.general_query.exec_(
+            'CREATE TABLE IF NOT EXISTS passwords (id INTEGER PRIMARY KEY ASC, categoria TEXT, icono BLOB, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
+        )
+        self.general_query.exec_(
+            'CREATE TABLE IF NOT EXISTS maestra (id INTEGER PRIMARY KEY, muestra BLOB);'
+        )
+        self.general_query.exec_(
+            'DELETE FROM passwords WHERE usuario = "" AND mail = "" AND contraseña_encriptada = ""'
+        )
+        self.db.commit()
+
+    def borrar_columna_contrasenas(self):
+        self.general_query.exec_(
+            'DROP TABLE IF EXISTS temporal'
+        )
+        self.general_query.exec_(
+            'CREATE TABLE temporal (id INTEGER PRIMARY KEY ASC, categoria TEXT, icono BLOB, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
+        )
+        self.popular.exec_(
+            'INSERT INTO temporal(id, categoria, icono, servicio, mail, usuario, contraseña_encriptada) SELECT id, categoria, icono, servicio, mail, usuario, contraseña_encriptada FROM passwords'
+        )
+        self.db.commit()
+        self.general_query.exec_(
+            'DROP TABLE IF EXISTS passwords'
+        )
+        self.popular.exec_(
+            'ALTER TABLE temporal RENAME TO passwords'
+        )
+        self.general_query.exec_(
+            'DROP TABLE IF EXISTS temporal'
+        )
+        self.db.commit()
 
     def cargar_config(self):
-        largo, mayus, minus, numeros, special, favicon = backend.obtener_cfg()
+        largo, mayus, minus, numeros, special, icono = backend.obtener_cfg()
         self.ui.spinBox_largo.setProperty("value", int(largo))
         self.ui.check_mayus.setChecked(backend.string2bool(mayus))
         self.ui.check_min.setChecked(backend.string2bool(minus))
         self.ui.check_numeros.setChecked(backend.string2bool(numeros))
         self.ui.check_caracteres.setChecked(backend.string2bool(special))
-        self.ui.check_amor.setChecked(backend.string2bool(favicon))
+        self.ui.check_amor.setChecked(backend.string2bool(icono))
 
     def guardar_config(self):
         hay_opcion_verdadera = False
@@ -164,9 +192,9 @@ class VentanaPrincipal(QTabWidget):
         minus = self.ui.check_min.checkState()
         numeros = self.ui.check_numeros.checkState()
         special = self.ui.check_caracteres.checkState()
-        favicon = self.ui.check_amor.checkState()
+        icono = self.ui.check_amor.checkState()
 
-        estado_checkeado = [mayus, minus, numeros, special, favicon]
+        estado_checkeado = [mayus, minus, numeros, special, icono]
         for i in range(len(estado_checkeado)):
             if str(estado_checkeado[i]) == "PySide2.QtCore.Qt.CheckState.Checked":
                 if i != 4:  # len de estado_checkeado - 1
@@ -189,7 +217,7 @@ class VentanaPrincipal(QTabWidget):
 
     def llamar_generar_contrasena(self):
         #  Primero obtenemos que tipo de contraseña quiere el usuario
-        largo, mayus, minus, numeros, special, favicon = backend.obtener_cfg()
+        largo, mayus, minus, numeros, special, icono = backend.obtener_cfg()
         mayus = backend.string2bool(mayus)
         minus = backend.string2bool(minus)
         numeros = backend.string2bool(numeros)
@@ -235,7 +263,6 @@ class VentanaPrincipal(QTabWidget):
             archivo_ico = backend.descargar_favico(url)
         except Exception:  # Si lo que se ingreso era un link pero no se consigui favicon
             with open("media/favicons/domain.ico") as ico:
-                print("Estamos aqui")
                 return QByteArray(ico.read())
         # Si no se consiguio la imagen
         if archivo_ico is None:
@@ -262,7 +289,7 @@ class VentanaPrincipal(QTabWidget):
             fav_icon = self.preparar_favicon(self.ui.input_url.text())
 
             self.save_query.prepare(
-                'INSERT INTO passwords (categoria, favicon, servicio, mail, usuario, contraseña_encriptada) VALUES(?,?,?,?,?,?)'
+                'INSERT INTO passwords (categoria, icono, servicio, mail, usuario, contraseña_encriptada) VALUES(?,?,?,?,?,?)'
             )
             self.save_query.addBindValue(self.ui.comboBox_categoria.currentText())
             self.save_query.addBindValue(fav_icon)
@@ -324,31 +351,14 @@ class VentanaPrincipal(QTabWidget):
             # return self.master_key = contrasena_maestra
 
     def filtrar(self):
-        '''
-        indice_combo = self.ui.combobox_filtro.currentIndex()
-        # Filtrar segun comboBox
-            # Por categoria
-        if indice_combo == 0:
-            self.model.setSort(1, Qt.AscendingOrder)
-            # Por usuario
-        elif indice_combo == 1:
-            self.model.setSort(5, Qt.AscendingOrder)
-            # Por mail
-        if indice_combo == 2:
-            self.model.setSort(4, Qt.AscendingOrder)
-            # Por servicio
-        elif indice_combo == 3:
-            self.model.setSort(3, Qt.AscendingOrder)
-        # Filtrar segun texto
-        filtrar_por_texto = self.ui.input_filtro.text()
-        if filtrar_por_texto == "":
+        if self.ui.input_filtro.text() == "":
             self.model.setFilter("")
+            return self.model.select()
         else:
-            filtrar_por_categoria = self.ui.combobox_filtro.currentText().lower()
-            self.model.setFilter('{} LIKE "{}"'.format(filtrar_por_categoria, filtrar_por_texto))
-
-        self.model.orderByClause()
-        self.model.select()'''
+            self.model.setFilter(
+                "{} LIKE '{}%'".format(self.ui.combobox_filtro.currentText().lower(), self.ui.input_filtro.text())
+            )
+            return self.model.select()  
 
     def mostrar_contrasenas(self):
         if self.master_key is None:
@@ -358,7 +368,9 @@ class VentanaPrincipal(QTabWidget):
                 return
 
         if self.candado == "abierto": # Si esta abierto
-            self.borrar_columna_contrasenas() 
+            self.borrar_columna_contrasenas()
+            self.ui.combobox_filtro.removeItem(4)
+            self.organizar_tabla_ui()
             self.ui.boton_seguridad.setIcon(self.icon_seguridad)
             self.candado = "cerrado" # lo cerramos
             return
@@ -370,7 +382,7 @@ class VentanaPrincipal(QTabWidget):
         # Conseguimos las contraseñas encriptadas
         self.passwords_query_retrieve.exec_('SELECT id, contraseña_encriptada FROM passwords')
         # Creamos una columna para las contraseñas descifradas
-        self.query.exec_('ALTER TABLE passwords ADD contraseña TEXT')
+        self.general_query.exec_('ALTER TABLE passwords ADD contraseña TEXT')
         self.db.commit()
         # Para cada contraseña
         while self.passwords_query_retrieve.next():
@@ -379,30 +391,8 @@ class VentanaPrincipal(QTabWidget):
             self.passwords_query_write.addBindValue(contraseña_descifrada)
             self.passwords_query_write.addBindValue(self.passwords_query_retrieve.value(0))
             self.passwords_query_write.exec_()
+        self.ui.combobox_filtro.addItem("Contraseña")
         self.organizar_tabla_ui() # Las hacemos visibles el la tabla
-
-    def borrar_columna_contrasenas(self):
-        self.query.exec_(
-            'DROP TABLE IF EXISTS temporal'
-        )
-        self.query.exec_(
-            'CREATE TABLE temporal (id INTEGER PRIMARY KEY ASC, categoria TEXT, favicon BLOB, servicio TEXT, mail TEXT, usuario TEXT, contraseña_encriptada BLOB);'
-        )
-        self.popular.exec_(
-            'INSERT INTO temporal(id, categoria, favicon, servicio, mail, usuario, contraseña_encriptada) SELECT id, categoria, favicon, servicio, mail, usuario, contraseña_encriptada FROM passwords'
-        )
-        self.db.commit()
-        self.query.exec_(
-            'DROP TABLE IF EXISTS passwords'
-        )
-        self.popular.exec_(
-            'ALTER TABLE temporal RENAME TO passwords'
-        )
-        self.query.exec_(
-            'DROP TABLE IF EXISTS temporal'
-        )
-        self.db.commit()
-        return self.organizar_tabla_ui()
 
     def actualizar_tabs(self, index):
         if index == 0:
@@ -417,8 +407,9 @@ class VentanaPrincipal(QTabWidget):
         self.model.setSort(1, Qt.AscendingOrder)
         self.model.select()
         self.ui.tabla_db.setModel(self.model)
-        self.ui.tabla_db.hideColumn(6) # Escondemos las contraseñas encriptadas
-        self.ui.tabla_db.hideColumn(0) # Escondemos id        
+        self.ui.tabla_db.setItemDelegateForColumn(2, pswItemDelegate.ImageDelegate(self.ui.tabla_db))
+        self.ui.tabla_db.hideColumn(0) # Escondemos id
+        self.ui.tabla_db.hideColumn(6) # Escondemos las contraseñas encriptadas                               
         self.ui.tabla_db.setWindowTitle("Lista de cuentas")
         # Tamaño columnas
         self.ui.tabla_db.resizeColumnsToContents()
@@ -469,7 +460,9 @@ class VentanaPrincipal(QTabWidget):
         existe = self.verificar_columna_contrasenas.exec_('SELECT contraseña FROM passwords LIMIT 1')
         if existe is True and borrar is True:
             self.verificar_columna_contrasenas.finish()
-            return self.borrar_columna_contrasenas()
+            self.borrar_columna_contrasenas()
+            return self.organizar_tabla_ui()
+
         elif existe is True:
             return "Existe"
     
@@ -484,6 +477,7 @@ class VentanaPrincipal(QTabWidget):
 
         elif self.modo_boton_editar_guardar == "guardar":
             self.borrar_columna_contrasenas()
+            self.organizar_tabla_ui()
             self.candado = "cerrado"
             self.ui.boton_seguridad.setDisabled(False)
             self.ui.boton_seguridad.setIcon(self.icon_seguridad)
@@ -497,8 +491,9 @@ class VentanaPrincipal(QTabWidget):
                 self.master_key = self.pedir_contrasena_maestra()
             except Exception:
                 raise Exception("No se pudo conseguir master key")
+        
+        self.ui.boton_seguridad.setDisabled(True)     
         if self.candado == "cerrado":
-            self.ui.boton_seguridad.setDisabled(True)
             self.mostrar_contrasenas()
 
     def celdasCambiadas(self, topLeft, bottomRight):
@@ -506,7 +501,11 @@ class VentanaPrincipal(QTabWidget):
             return
         else:
             if topLeft.column() == 7:
-                contrasena_editada_encriptada = QByteArray(pswCrypto.encriptar(self.model.record(topLeft.row()).value('contraseña'), self.master_key))
+                
+                contrasena_editada_encriptada = ""
+                if self.model.record(topLeft.row()).value('contraseña') != "":
+                    contrasena_editada_encriptada = QByteArray(pswCrypto.encriptar(self.model.record(topLeft.row()).value('contraseña'), self.master_key))
+    
                 casilla_editada = QSqlField("contraseña_encriptada")
                 casilla_editada.setValue(contrasena_editada_encriptada)
                 valores_fila = self.model.record(topLeft.row())
