@@ -9,22 +9,13 @@ from urllib import request
 from webbrowser import open as web_open
 from random import choice
 from pyperclip import copy
-
-from PySide2.QtSql import QSqlDatabase, QSqlQuery
-
 from cryptography.fernet import InvalidToken
+
 from pswCrypto import generar_key, encriptar, descifrar
 
 
 # Base de datos
 # ~~~~~~~~~~~~~
-def conectar_db(db):
-    try:
-
-        return conexion, cursor
-    except Exception as e:
-        print(e)
-
 def obtener_muestra_db():
     conexion = sqlite3.connect("cuentas.db")
     cursor = conexion.cursor()    
@@ -35,26 +26,6 @@ def obtener_muestra_db():
         return None
     else:
         return muestra_db[0]
-
-def guardar(conexion, cursor, categoria, icono, servicio, mail, usuario, contraseña):
-    try:
-        cursor.execute('INSERT INTO passwords(categoria, icono, servicio, mail, usuario, contraseña_encriptada) VALUES(?, ?, ?, ?, ?)', (categoria, icono, servicio, mail, usuario, contraseña))
-        conexion.commit()
-    except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(ex).__name__, ex.args)
-        print(message)
-
-def obtener_columna(cursor, columna):
-    cursor.execute("SELECT {} FROM passwords".format(columna))
-    entradas = cursor.fetchall()
-    resultados = [x[0] for x in entradas]
-    resultados = list(filter(None, resultados))
-
-    return resultados
-
-
-
 
 
 # Funcionalidad general
@@ -115,7 +86,7 @@ def descargar_favico(url):
     if url == "":
         return None
         
-    nombre = re.search(r"(www\.)?(?P<nombre_pagina>[\w\d\-@:%\._\+~#=]{2,256})(?P<terminacion>\.\w{2,6})", url)
+    nombre = re.search(r"(www\.)?(?P<nombre_pagina>[\w\d\-@:%._+~#=]{2,256})(?P<terminacion>\.\w{2,6})", url)
     if nombre is None:
         return None
 
@@ -135,17 +106,18 @@ def descargar_favico(url):
         print(message)
         return None
 
-    favicon_a_descargar = re.search(r'("src":)?."(?P<fav_icon>[\w\-@:%\._\+~#=\/]+\.ico)"', str(favicon_a_descargar))
+    favicon_a_descargar = re.search(r'("src":)?."(?P<fav_icon>[\w\-@:%._+~#=/]+\.ico)"', str(favicon_a_descargar))
    
     if favicon_a_descargar is None:
+            """ Hacer un archivo de registro
+            try:
+                raise SyntaxError("El siguiente url no tuvo resultados regex, url: {}".format(url))
+            except Exception as e:
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(e).__name__, e.args)
+                print(message)
+            """
             return None
-            # Hacer un archivo de registro
-            #try:
-            #    raise SyntaxError("El siguiente url no tuvo resultados regex, url: {}".format(url))
-            #except Exception as e:
-            #    template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            #    message = template.format(type(e).__name__, e.args)
-            #    print(message)
 
     favicon_a_descargar = favicon_a_descargar.group("fav_icon")
     # Lo descargamos y guardamos
@@ -153,7 +125,7 @@ def descargar_favico(url):
         try:
             imagen.write(request.urlopen(favicon_a_descargar).read())
             # Devolvemos el directorio donde se guarda la imagen
-            #print(url)
+            # print(url)
             return icono
 
         except Exception as e:
@@ -166,6 +138,7 @@ def descargar_favico(url):
                 print("Algo salio demasaido mal")
     print(url)
 
+
 # Si no se pudo descargar la imagen, hay que borrar el archivo vacio
 def borrar_favico(archivo):
     try:
@@ -174,14 +147,15 @@ def borrar_favico(archivo):
         print(e)
 
 
-def generar_cfg(largo: int =13, mayus=True, minus=True, numeros=True, special=True, icono=True):
+def generar_cfg(largo: int = 13, mayus=True, minus=True, numeros=True, special=True, icono=True):
     cfg = configparser.ConfigParser()
     cfg['OPCIONES'] = {'largo': largo,
-                      'mayus': mayus,
-                      'minus': minus,
-                      'numeros': numeros,
-                      'special': special,
-                      'icono': icono}
+                       'mayus': mayus,
+                       'minus': minus,
+                       'numeros': numeros,
+                       'special': special,
+                       'icono': icono
+                       }
 
     with open("opciones.ini", "w") as configfile:
         cfg.write(configfile)
@@ -191,7 +165,7 @@ def obtener_cfg():
     if not isfile("./opciones.ini"):
         generar_cfg()
     if not isfile("./cuentas.db"):
-       pass#crear_tabla_contraseñas(conectar_db("cuentas.db"))
+        pass  # crear_tabla_contraseñas(conectar_db("cuentas.db"))
     try:
         cfg = configparser.ConfigParser()
         cfg.read('opciones.ini')
@@ -202,17 +176,21 @@ def obtener_cfg():
         special = cfg['OPCIONES']['special']
         icono = cfg['OPCIONES']['icono']
 
-    except configparser.MissingSectionHeaderError as HeaderError:
+    except configparser.MissingSectionHeaderError:
         generar_cfg()
         return obtener_cfg()
+    except KeyError:
+        generar_cfg()
+        return obtener_cfg()
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        return print(message)
 
-    except Exception as e:
-        return print("El error es:", e, " -- Y es de tipo:", type(e))
-    
     try:
         largo = int(largo)
 
-    except ValueError as verror:
+    except ValueError:
         generar_cfg(13, mayus, minus, numeros, special, icono)
         return obtener_cfg()
 
@@ -223,14 +201,9 @@ def obtener_cfg():
     return largo, mayus, minus, numeros, special, icono
 
 
-def editar_cfg(categoria, argumento, valor):
-    cfg = configparser.ConfigParser()
-    valor = cfg[categoria][argumento] 
-    with open("opciones.ini", "w") as configfile:
-        cfg.write(configfile)
-
 def copiar(text):
     copy(text)
+
 
 # Encripatdo
 # ~~~~~~~~~~
@@ -240,17 +213,15 @@ def generar_muestra(key):
 
 
 def verificar_key(muestra, key):
-    try:
-        muestra = descifrar(muestra, key)
-        return True
-    except InvalidToken:
-        return False
-
-    '''
+    """
     muestra = descifrar(muestra, key)
     print(type(muestra))
     if muestra == "An exception of type InvalidToken occurred.":
         return False
     elif muestra is not None:
-        return True'''
-
+        return True"""
+    try:
+        descifrar(muestra, key)  # muestra = descifrar(muestra, key)
+        return True
+    except InvalidToken:
+        return False

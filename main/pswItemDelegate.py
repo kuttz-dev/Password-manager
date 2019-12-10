@@ -1,9 +1,6 @@
-import copy
-from PySide2.QtSql import QSqlRelationalDelegate
-from PySide2.QtWidgets import (QItemDelegate, QFileDialog, QStyledItemDelegate,
-    QStyle, QStyleOptionViewItem)
-from PySide2.QtGui import QMouseEvent, QPixmap, QPalette
-from PySide2.QtCore import QByteArray, QEvent, QSize, Qt
+from PySide2.QtWidgets import QFileDialog, QStyledItemDelegate, QStyle
+from PySide2.QtGui import QPixmap, QPalette
+from PySide2.QtCore import QByteArray, QSize, Qt
 
 
 class ImageDelegate(QStyledItemDelegate):
@@ -24,7 +21,6 @@ class ImageDelegate(QStyledItemDelegate):
             the column number to find out if we needed to paint the
             stars, but it works for the purposes of this example.
         """
-        model = index.model()
         if option.state & QStyle.State_Enabled:
             if option.state & QStyle.State_Active:
                 color_group = QPalette.Normal
@@ -35,14 +31,14 @@ class ImageDelegate(QStyledItemDelegate):
 
         if option.state & QStyle.State_Selected:
             painter.fillRect(option.rect,
-                option.palette.color(color_group, QPalette.Highlight))
-        
+                             option.palette.color(color_group, QPalette.Highlight)
+                             )
         imagen = QPixmap()
         try:
             imagen.loadFromData(index.data())  # , Qt.DisplayRole
         except TypeError:
             return QStyledItemDelegate.paint(self, painter, option, index)
-        imagen = imagen.scaled(QSize(16,16), Qt.KeepAspectRatio)
+        imagen = imagen.scaled(QSize(16, 16), Qt.KeepAspectRatio)
         width = imagen.width()
         height = imagen.height()
         """Para calcular el lugar donde se tiene que dibujar
@@ -62,7 +58,6 @@ class ImageDelegate(QStyledItemDelegate):
         painter.drawLine(option.rect.topRight(), option.rect.bottomRight())
         painter.setPen(pen)
 
-
     def sizeHint(self, option, index):
         """ Returns the size needed to display the item in a QSize object. """
         imagen = QPixmap()
@@ -74,11 +69,11 @@ class ImageDelegate(QStyledItemDelegate):
         size_hint = QSize(5 * imagen.width(), imagen.height()) + QSize(1, 1)
         return size_hint
 
-
     def createEditor(self, parent, option, index):
         editor = QFileDialog()
         editor.setFileMode(QFileDialog.ExistingFile)
-        editor.setNameFilter(("Imagenes (*.png *.xpm *.jpg *.ico)"))
+        editor.setNameFilter("Imagenes (*.png *.xpm *.jpg *.ico)")
+        editor.resize(437, 200)
         return editor
 
     def setModelData(self, editor, model, index):
@@ -86,7 +81,7 @@ class ImageDelegate(QStyledItemDelegate):
             try:
                 selected_file = editor.selectedFiles()[0]
             except IndexError:
-                return False # Le dio a cancelar
+                return False  # Le dio a cancelar
             with open(selected_file, "rb") as ico:
                 array = QByteArray(ico.read())
             model.setData(index, array)
@@ -94,4 +89,3 @@ class ImageDelegate(QStyledItemDelegate):
             return True
 
         return False
-  

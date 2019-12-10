@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'dialogo_master_psw.ui',
 # licensing of 'dialogo_master_psw.ui' applies.
 #
-# Created: Mon Dec  9 00:52:52 2019
+# Created: Tue Dec 10 11:16:14 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -72,6 +72,7 @@ class Ui_dialogo_master_psw(object):
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.buttonBox = QtWidgets.QDialogButtonBox(dialogo_master_psw)
+        self.buttonBox.setCursor(QtCore.Qt.PointingHandCursor)
         self.buttonBox.setToolTip("")
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)

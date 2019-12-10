@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'dialogo_informacion.ui',
 # licensing of 'dialogo_informacion.ui' applies.
 #
-# Created: Mon Dec  9 00:52:52 2019
+# Created: Tue Dec 10 11:16:14 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,7 +13,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 class Ui_dialogo_info(object):
     def setupUi(self, dialogo_info):
         dialogo_info.setObjectName("dialogo_info")
-        dialogo_info.resize(437, 216)
+        dialogo_info.resize(437, 218)
         dialogo_info.setMinimumSize(QtCore.QSize(437, 0))
         dialogo_info.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon = QtGui.QIcon()
@@ -37,6 +37,7 @@ class Ui_dialogo_info(object):
         self.hlayout_botones.setObjectName("hlayout_botones")
         self.boton_steam = QtWidgets.QPushButton(dialogo_info)
         self.boton_steam.setMaximumSize(QtCore.QSize(30, 30))
+        self.boton_steam.setCursor(QtCore.Qt.PointingHandCursor)
         self.boton_steam.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/media/branding/steam.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -46,6 +47,7 @@ class Ui_dialogo_info(object):
         self.hlayout_botones.addWidget(self.boton_steam)
         self.boton_discord = QtWidgets.QPushButton(dialogo_info)
         self.boton_discord.setMaximumSize(QtCore.QSize(30, 30))
+        self.boton_discord.setCursor(QtCore.Qt.PointingHandCursor)
         self.boton_discord.setText("")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/media/branding/Discord-Logo-Black.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -55,6 +57,7 @@ class Ui_dialogo_info(object):
         self.hlayout_botones.addWidget(self.boton_discord)
         self.boton_github = QtWidgets.QPushButton(dialogo_info)
         self.boton_github.setMaximumSize(QtCore.QSize(30, 30))
+        self.boton_github.setCursor(QtCore.Qt.PointingHandCursor)
         self.boton_github.setText("")
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(":/media/branding/GitHub-Mark-64px.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -92,15 +95,22 @@ class Ui_dialogo_info(object):
         self.hlayout_principal.setStretch(0, 20)
         self.hlayout_principal.setStretch(1, 80)
         self.verticalLayout.addLayout(self.hlayout_principal)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.buttonBox = QtWidgets.QDialogButtonBox(dialogo_info)
+        self.buttonBox.setCursor(QtCore.Qt.PointingHandCursor)
         self.buttonBox.setAccessibleName("")
         self.buttonBox.setAccessibleDescription("")
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Close)
         self.buttonBox.setObjectName("buttonBox")
-        self.verticalLayout.addWidget(self.buttonBox)
+        self.horizontalLayout.addWidget(self.buttonBox)
+        self.horizontalLayout.setStretch(0, 90)
+        self.horizontalLayout.setStretch(1, 10)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.verticalLayout.setStretch(0, 30)
-        self.verticalLayout.setStretch(1, 10)
 
         self.retranslateUi(dialogo_info)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), dialogo_info.accept)
@@ -110,7 +120,7 @@ class Ui_dialogo_info(object):
     def retranslateUi(self, dialogo_info):
         dialogo_info.setWindowTitle(QtWidgets.QApplication.translate("dialogo_info", "Información", None, -1))
         self.etiqueta_titulo.setText(QtWidgets.QApplication.translate("dialogo_info", "<html><head/><body><p>Psw-manager by Küttz</p></body></html>", None, -1))
-        self.etiqueta_descripccion.setText(QtWidgets.QApplication.translate("dialogo_info", "<html><head/><body><p>Este proyecto es un trabajo en curso desarrollado únicamente por mi utilizando python. Seria genial si podes aportar a este proyecto revisando el código en github, comentando, encontrando errores, etc. Podes encontrarme en mi servidor de discord o a través de mi cuenta de steam dejando un comentario.</p><p>Algunos de los iconos pertenecen a Smashicons, Iconnice, Vignesh Oviyan y Freepik a traves de flaticon.com</p><p>Agradecimientos especiales a Roja</p></body></html>", None, -1))
+        self.etiqueta_descripccion.setText(QtWidgets.QApplication.translate("dialogo_info", "<html><head/><body><p>Este proyecto es un trabajo en curso desarrollado únicamente por mi utilizando python. Seria genial si podes aportar a este proyecto revisando el código en github, comentando, encontrando errores, etc. Podes encontrarme en mi servidor de discord o a través de mi cuenta de steam dejando un comentario.</p><p>Los iconos pertenecen a Smashicons, Vignesh Oviyan, Those icons,  Iconnice y Freepik a traves de flaticon.com</p><p>Agradecimientos especiales a Roja</p></body></html>", None, -1))
 
 import resources_rc
 

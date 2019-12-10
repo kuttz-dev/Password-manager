@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'psw_tool.ui',
 # licensing of 'psw_tool.ui' applies.
 #
-# Created: Mon Dec  9 00:52:52 2019
+# Created: Tue Dec 10 11:16:14 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -272,7 +272,7 @@ class Ui_TabWidget(object):
         self.boton_editar.setStatusTip("")
         self.boton_editar.setText("")
         icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(":/media/iconografia/document.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon6.addPixmap(QtGui.QPixmap(":/media/iconografia/pencil.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.boton_editar.setIcon(icon6)
         self.boton_editar.setObjectName("boton_editar")
         self.horizontalLayout.addWidget(self.boton_editar)
@@ -359,6 +359,7 @@ class Ui_TabWidget(object):
         self.check_numeros.setObjectName("check_numeros")
         self.gridLayout_2.addWidget(self.check_numeros, 1, 0, 1, 1)
         self.boton_info = QtWidgets.QPushButton(self.grupo_opciones_psw)
+        self.boton_info.setCursor(QtCore.Qt.PointingHandCursor)
         self.boton_info.setText("")
         icon8 = QtGui.QIcon()
         icon8.addPixmap(QtGui.QPixmap(":/media/iconografia/info.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

@@ -1,4 +1,9 @@
-﻿You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+﻿Maybe a logging system
+
+
+
+--- Done: ---
+You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
 
 https://support.flaticon.com/hc/en-us/articles/207248209-How-I-must-insert-the-attribution-
 Iconnice
