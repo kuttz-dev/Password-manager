@@ -1,8 +1,8 @@
 import sys
 
-from PySide2.QtWidgets import QApplication, QTabWidget, QLineEdit, QMessageBox, QDialog, QHeaderView, QComboBox
+from PySide2.QtWidgets import QApplication, QTabWidget, QLineEdit, QMessageBox, QDialog, QHeaderView, QComboBox, QMenu
 from PySide2.QtCore import QFile, QByteArray, Qt
-from PySide2.QtGui import QIcon, QPixmap
+from PySide2.QtGui import QIcon, QPixmap, QCursor
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel, QSqlField
 
 from psw_tool_ui import Ui_TabWidget
@@ -46,7 +46,8 @@ class VentanaPrincipal(QTabWidget):
 		self.model.setEditStrategy(QSqlTableModel.OnManualSubmit)  # Va aca abajo por self.model.setTable('passwords')
 		# Para cuando se cambian datos
 		self.model.dataChanged.connect(self.celdas_cambiadas)
-
+		self.ui.tabla_db.setContextMenuPolicy(Qt.CustomContextMenu)
+		self.ui.tabla_db.customContextMenuRequested.connect(self.context_menu)
 		# Filtro DB
 		# .connect(lambda: self.
 		self.tabBarClicked.connect(self.actualizar_tabs)
@@ -87,7 +88,7 @@ class VentanaPrincipal(QTabWidget):
 														"La contraseña que ingresaste es incorrecta"
 														)
 		self.alerta_guardado_exitoso = QMessageBox(QMessageBox.Information, "Información guardada",
-													"Toda la información que ingresaste se guardó con exito."
+													"Toda la información que ingresaste se guardó con éxito."
 												)
 		self.alerta_config.setWindowIcon(self.icon_ventana)
 		self.alerta_master_psw_mala.setWindowIcon(self.icon_ventana)
@@ -142,7 +143,6 @@ class VentanaPrincipal(QTabWidget):
 		self.ui.comboBox_mail.clearEditText()
 		self.ui.comboBox_categoria.clearEditText()
 
-	# print(self.model.flags(self.model.index(0,2)))
 
 	def organizar_db(self):
 		self.general_query.exec_(
@@ -267,7 +267,7 @@ class VentanaPrincipal(QTabWidget):
 	def preparar_favicon(self, url):
 		try:
 			archivo_ico = backend.descargar_favico(url)
-		except Exception:  # Si lo que se ingreso era un link pero no se consigui favicon
+		except Exception:  # Si lo que se ingreso era un link pero no se consiguio favicon
 			with open("media/favicons/domain.ico") as ico:
 				return QByteArray(ico.read())
 		# Si no se consiguio la imagen
@@ -354,7 +354,6 @@ class VentanaPrincipal(QTabWidget):
 			else:
 				self.alerta_master_psw_incorrecta.exec_()
 				raise Exception("Contraseña maestra incorrecta")
-		# return self.master_key = contrasena_maestra
 
 	def filtrar(self):
 		if self.ui.input_filtro.text() == "":
@@ -422,11 +421,11 @@ class VentanaPrincipal(QTabWidget):
 		self.ui.tabla_db.hideColumn(6)  # Escondemos las contraseñas encriptadas
 		self.ui.tabla_db.setWindowTitle("Lista de cuentas")
 		# Tamaño columnas
-		self.ui.tabla_db.resizeColumnsToContents()
+		#self.ui.tabla_db.resizeColumnsToContents()
 		self.ui.tabla_db.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-		# self.ui.tabla_db.horizontalHeader().setSectionsClickable(False)
+		self.ui.tabla_db.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)  # iconos
+		self.ui.tabla_db.setColumnWidth(2, 32)  # tamaño iconos
 		self.ui.tabla_db.verticalHeader().setVisible(False)
-		# self.ui.tabla_db.horizontalHeader().setSortIndicator(2, Qt.AscendingOrder)
 		self.ui.tabla_db.setSortingEnabled(True)
 
 	def cargar_opciones_combo_boxes(self):
@@ -525,6 +524,19 @@ class VentanaPrincipal(QTabWidget):
 			else:
 				self.model.updateRowInTable(top_left.row(), self.model.record(top_left.row()))
 				return self.db.commit()
+
+	def borrar_linea(self, row):
+		self.model.deleteRowFromTable(row)
+		return self.model.select()
+
+	def context_menu(self):
+		# Menu con click derecho
+		if self.ui.tabla_db.selectedIndexes() and self.modo_boton_editar_guardar == "guardar":
+			menu = QMenu()
+			borrar_data = menu.addAction("Borrar linea de la base de datos")
+			borrar_data.triggered.connect(lambda: self.borrar_linea(self.ui.tabla_db.currentIndex().row()))
+			cursor = QCursor()
+			menu.exec_(cursor.pos())
 
 
 if __name__ == "__main__":

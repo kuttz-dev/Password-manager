@@ -2,13 +2,12 @@ from PySide2.QtWidgets import QFileDialog, QStyledItemDelegate, QStyle
 from PySide2.QtGui import QPixmap, QPalette
 from PySide2.QtCore import QByteArray, QSize, Qt
 
-
 class ImageDelegate(QStyledItemDelegate):
     """Books delegate to rate the books"""
 
     def __init__(self, parent=None):
         QStyledItemDelegate.__init__(self, parent)
-        # self.star = QPixmap(":/media/favicons/domain.ico.png")
+
 
     def paint(self, painter, option, index):
         """ Paint the items in the table.
@@ -54,9 +53,6 @@ class ImageDelegate(QStyledItemDelegate):
 
         pen = painter.pen()
         painter.setPen(option.palette.color(QPalette.Mid))
-        painter.drawLine(option.rect.bottomLeft(), option.rect.bottomRight())
-        painter.drawLine(option.rect.topRight(), option.rect.bottomRight())
-        painter.setPen(pen)
 
     def sizeHint(self, option, index):
         """ Returns the size needed to display the item in a QSize object. """
