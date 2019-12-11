@@ -405,10 +405,12 @@ class VentanaPrincipal(QTabWidget):
 
 	def actualizar_tabs(self, index):
 		if index == 0:
+			self.resize(437, 200)
 			self.cargar_opciones_combo_boxes()
 		if index == 1 and self.ui.boton_seguridad.isEnabled() is True:
 			self.organizar_tabla_ui()
 		elif index == 2:
+			self.resize(437, 200)
 			self.cargar_config()
 
 	def organizar_tabla_ui(self):
